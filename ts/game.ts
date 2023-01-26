@@ -64,26 +64,35 @@ export class Game {
   }
 
   private setUpFloor() {
-    let boxBGeometry = new THREE.BoxGeometry(10, 10, 10, 8, 8, 8);
+    let boxBGeometry = new THREE.BoxGeometry(10, 10, 10, 32, 32, 32);
     const boxGeometry = BufferGeometryUtils.mergeVertices(boxBGeometry, 0.01);
     this.reversePositions(boxGeometry.getIndex());
     boxGeometry.computeVertexNormals();
 
     const floor = new AmbientOcclusionMesh(boxGeometry,
-      64, this.scene, this.renderer,
-      new THREE.Color('#fad'), new THREE.Color('#000'));
+      32, this.scene, this.renderer,
+      new THREE.Color('#aaa'), new THREE.Color('#000'));
     this.scene.add(floor);
 
     const lightGeometry = BufferGeometryUtils.mergeVertices(
-      new THREE.IcosahedronGeometry(0.4, 1), 0.01);
+      new THREE.BoxGeometry(10, 0.1, 10), 0.01);
     lightGeometry.computeVertexNormals();
     const light = new AmbientOcclusionMesh(
       lightGeometry,
       16, this.scene, this.renderer,
-      new THREE.Color('#111'), new THREE.Color('#dea'));
-
-    light.position.set(-0.5, 0, -4);
+      new THREE.Color('#111'), new THREE.Color(0.005, 0.005, 0.005));
+    light.position.set(0, 5, 0);
     this.scene.add(light);
+
+    const light2Geometry = BufferGeometryUtils.mergeVertices(
+      new THREE.IcosahedronGeometry(0.4, 1), 0.01);
+    light2Geometry.computeVertexNormals();
+    const light2 = new AmbientOcclusionMesh(
+      light2Geometry,
+      16, this.scene, this.renderer,
+      new THREE.Color('#111'), new THREE.Color('#dea'));
+    light2.position.set(-0.5, 2.2, -3.5);
+    this.scene.add(light2);
 
     const ballGeometry = BufferGeometryUtils.mergeVertices(
       new THREE.IcosahedronGeometry(0.7, 2), 0.01);
@@ -91,15 +100,25 @@ export class Game {
     const ball = new AmbientOcclusionMesh(
       ballGeometry,
       32, this.scene, this.renderer,
-      new THREE.Color('#f00'), new THREE.Color('#000'));
-
+      new THREE.Color('#f44'), new THREE.Color('#000'));
     ball.position.set(0.6, 0, -4.7);
     this.scene.add(ball);
+
+    const ball2Geometry = BufferGeometryUtils.mergeVertices(
+      new THREE.IcosahedronGeometry(1.5, 1), 0.01);
+    ball2Geometry.computeVertexNormals();
+    const ball2 = new AmbientOcclusionMesh(
+      ball2Geometry,
+      32, this.scene, this.renderer,
+      new THREE.Color('#44f'), new THREE.Color('#000'));
+    ball2.position.set(-1.8, 0.5, -5.1);
+    this.scene.add(ball2);
 
     const updateF = () => {
       console.time('update');
       floor.update();
       ball.update();
+      ball2.update();
       console.timeEnd('update');
       setTimeout(updateF, 1000);
     };

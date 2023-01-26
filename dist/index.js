@@ -52,6 +52,9 @@ class AmbientOcclusionMesh extends THREE.Mesh {
         void main() {
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
           vColor = light * color + emissive;
+          vec3 nColor = normalize(vColor);
+          float lColor = pow(length(vColor), 0.8);
+          vColor = lColor * nColor;
         }
             `,
             fragmentShader: `
@@ -97,15 +100,15 @@ class AmbientOcclusionMesh extends THREE.Mesh {
         // Calculate the average color
         let red = 0, green = 0, blue = 0;
         for (let i = 0; i < this.buffer.length; i += 4) {
-            red += this.buffer[i];
-            green += this.buffer[i + 1];
-            blue += this.buffer[i + 2];
+            red += Math.pow(this.buffer[i] / 255, 1.0);
+            green += Math.pow(this.buffer[i + 1] / 255, 1.0);
+            blue += Math.pow(this.buffer[i + 2] / 255, 1.0);
         }
         let pixelCount = this.buffer.length / 4;
-        red /= pixelCount;
-        green /= pixelCount;
-        blue /= pixelCount;
-        colors.setXYZ(i, red / 255, green / 255, blue / 255);
+        red = red / pixelCount;
+        green = green / pixelCount;
+        blue = blue / pixelCount;
+        colors.setXYZ(i, red, green, blue);
         // console.log(`${[red, green, blue]}`);
     }
     update() {
@@ -118,6 +121,9 @@ class AmbientOcclusionMesh extends THREE.Mesh {
         for (let i = 0; i < vertices.count; i++) {
             vertex.fromBufferAttribute(vertices, i);
             normal.fromBufferAttribute(normals, i);
+            // normal.x += (Math.random() * 0.1) - 0.05;
+            // normal.y += (Math.random() * 0.1) - 0.05;
+            // normal.z += (Math.random() * 0.1) - 0.05;
             normal.setLength(0.05);
             vertex.add(normal);
             this.camera.position.copy(vertex);
@@ -221,26 +227,37 @@ class Game {
         }
     }
     setUpFloor() {
-        let boxBGeometry = new THREE.BoxGeometry(10, 10, 10, 8, 8, 8);
+        let boxBGeometry = new THREE.BoxGeometry(10, 10, 10, 32, 32, 32);
         const boxGeometry = BufferGeometryUtils.mergeVertices(boxBGeometry, 0.01);
         this.reversePositions(boxGeometry.getIndex());
         boxGeometry.computeVertexNormals();
-        const floor = new ambientOcclusionMesh_1.AmbientOcclusionMesh(boxGeometry, 64, this.scene, this.renderer, new THREE.Color('#fad'), new THREE.Color('#000'));
+        const floor = new ambientOcclusionMesh_1.AmbientOcclusionMesh(boxGeometry, 32, this.scene, this.renderer, new THREE.Color('#aaa'), new THREE.Color('#000'));
         this.scene.add(floor);
-        const lightGeometry = BufferGeometryUtils.mergeVertices(new THREE.IcosahedronGeometry(0.4, 1), 0.01);
+        const lightGeometry = BufferGeometryUtils.mergeVertices(new THREE.BoxGeometry(10, 0.1, 10), 0.01);
         lightGeometry.computeVertexNormals();
-        const light = new ambientOcclusionMesh_1.AmbientOcclusionMesh(lightGeometry, 16, this.scene, this.renderer, new THREE.Color('#111'), new THREE.Color('#dea'));
-        light.position.set(-0.5, 0, -4);
+        const light = new ambientOcclusionMesh_1.AmbientOcclusionMesh(lightGeometry, 16, this.scene, this.renderer, new THREE.Color('#111'), new THREE.Color(0.005, 0.005, 0.005));
+        light.position.set(0, 5, 0);
         this.scene.add(light);
+        const light2Geometry = BufferGeometryUtils.mergeVertices(new THREE.IcosahedronGeometry(0.4, 1), 0.01);
+        light2Geometry.computeVertexNormals();
+        const light2 = new ambientOcclusionMesh_1.AmbientOcclusionMesh(light2Geometry, 16, this.scene, this.renderer, new THREE.Color('#111'), new THREE.Color('#dea'));
+        light2.position.set(-0.5, 2.2, -3.5);
+        this.scene.add(light2);
         const ballGeometry = BufferGeometryUtils.mergeVertices(new THREE.IcosahedronGeometry(0.7, 2), 0.01);
         ballGeometry.computeVertexNormals();
-        const ball = new ambientOcclusionMesh_1.AmbientOcclusionMesh(ballGeometry, 32, this.scene, this.renderer, new THREE.Color('#f00'), new THREE.Color('#000'));
+        const ball = new ambientOcclusionMesh_1.AmbientOcclusionMesh(ballGeometry, 32, this.scene, this.renderer, new THREE.Color('#f44'), new THREE.Color('#000'));
         ball.position.set(0.6, 0, -4.7);
         this.scene.add(ball);
+        const ball2Geometry = BufferGeometryUtils.mergeVertices(new THREE.IcosahedronGeometry(1.5, 1), 0.01);
+        ball2Geometry.computeVertexNormals();
+        const ball2 = new ambientOcclusionMesh_1.AmbientOcclusionMesh(ball2Geometry, 32, this.scene, this.renderer, new THREE.Color('#44f'), new THREE.Color('#000'));
+        ball2.position.set(-1.8, 0.5, -5.1);
+        this.scene.add(ball2);
         const updateF = () => {
             console.time('update');
             floor.update();
             ball.update();
+            ball2.update();
             console.timeEnd('update');
             setTimeout(updateF, 1000);
         };

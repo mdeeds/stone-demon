@@ -26,6 +26,9 @@ export class AmbientOcclusionMesh extends THREE.Mesh {
         void main() {
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
           vColor = light * color + emissive;
+          vec3 nColor = normalize(vColor);
+          float lColor = pow(length(vColor), 0.8);
+          vColor = lColor * nColor;
         }
             `,
         fragmentShader: `
@@ -84,16 +87,16 @@ export class AmbientOcclusionMesh extends THREE.Mesh {
     // Calculate the average color
     let red = 0, green = 0, blue = 0;
     for (let i = 0; i < this.buffer.length; i += 4) {
-      red += this.buffer[i];
-      green += this.buffer[i + 1];
-      blue += this.buffer[i + 2];
+      red += Math.pow(this.buffer[i] / 255, 1.0);
+      green += Math.pow(this.buffer[i + 1] / 255, 1.0);
+      blue += Math.pow(this.buffer[i + 2] / 255, 1.0);
     }
     let pixelCount = this.buffer.length / 4;
-    red /= pixelCount;
-    green /= pixelCount;
-    blue /= pixelCount;
+    red = red / pixelCount;
+    green = green / pixelCount;
+    blue = blue / pixelCount;
 
-    colors.setXYZ(i, red / 255, green / 255, blue / 255);
+    colors.setXYZ(i, red, green, blue);
     // console.log(`${[red, green, blue]}`);
   }
 
@@ -108,6 +111,9 @@ export class AmbientOcclusionMesh extends THREE.Mesh {
     for (let i = 0; i < vertices.count; i++) {
       vertex.fromBufferAttribute(vertices, i);
       normal.fromBufferAttribute(normals, i);
+      // normal.x += (Math.random() * 0.1) - 0.05;
+      // normal.y += (Math.random() * 0.1) - 0.05;
+      // normal.z += (Math.random() * 0.1) - 0.05;
       normal.setLength(0.05);
       vertex.add(normal);
       this.camera.position.copy(vertex);

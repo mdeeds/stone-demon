@@ -1,0 +1,22 @@
+{
+  "name": "stone-demon",
+  "version": "1.0.0",
+  "description": "A horror-themed Sokoban",
+  "main": "dist/index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mdeeds/stone-demon.git"
+  },
+  "author": "Matt Deeds",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mdeeds/stone-demon/issues"
+  },
+  "homepage": "https://github.com/mdeeds/stone-demon#readme",
+  "devDependencies": {
+    "@types/three": "^0.148.1"
+  }
+}
